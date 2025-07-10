@@ -1,0 +1,6 @@
+# Rider files
+.idea/
+
+# Generated project files
+nes-emulator-solution/x64/
+nes-emulator-solution/Debug/

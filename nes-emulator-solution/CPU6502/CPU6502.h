@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <cstdint>
-#include <functional>
 #include <string>
 
 #include "../Bus/BusDevice.h"
@@ -9,6 +8,8 @@
 class CPU6502 : public BusDevice
 {
 private:
+    static constexpr int INSTRUCTION_SET_SIZE = 256;
+    
     uint8_t a_reg = 0x00;       // Accumulator register
     uint8_t x_reg = 0x00;       // X register
     uint8_t y_reg = 0x00;       // Y register
@@ -21,6 +22,7 @@ private:
     uint64_t cyclesCount = 0;   // Number of cycles since cpu start
     
     void resetInternal();       // Resets everything to zero
+    void initializeOpcodes();   // Generates opcodes lookup map
     
 public:
     CPU6502();
@@ -53,12 +55,12 @@ private:
 
     struct Instruction
     {
-        std::string mnemonic;
-        std::function<uint16_t(uint8_t& cycles)> addressing;
-        std::function<void(uint16_t address, uint8_t& cycles)> operation;
+        std::string mnemonic;                                           // Mnemonic to use for debugging purposes
+        uint16_t(CPU6502::*addressing)(uint8_t& cycles);                // Function pointer for addressing mode
+        void(CPU6502::*operation)(uint16_t address, uint8_t& cycles);   // Function pointer for operation
     };
 
-    Instruction opcodes[256];
+    Instruction opcodes[INSTRUCTION_SET_SIZE];
 
     // Addressing modes
     uint16_t ACC(uint8_t& cycles); // accumulator
@@ -132,4 +134,5 @@ private:
     void TXA(uint16_t address, uint8_t& cycles); // transfer X to accumulator
     void TXS(uint16_t address, uint8_t& cycles); // transfer X to stack pointer
     void TYA(uint16_t address, uint8_t& cycles); // transfer Y to accumulator
+    void ILL(uint16_t address, uint8_t& cycles); // illegal opcode
 };

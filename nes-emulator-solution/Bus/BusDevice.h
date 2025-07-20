@@ -1,10 +1,11 @@
 ﻿#pragma once
-#include "Bus.h"
+#include "IODevice.h"
 
-class BusDevice
+class BusDevice : public IODevice
 {
 protected:
-    Bus* bus;
+    IODevice* bus;
 public:
-    void connect(Bus* bus);
+    bool isValidAddress(uint16_t addr) override;
+    void connect(IODevice* bus);
 };

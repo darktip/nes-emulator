@@ -159,13 +159,17 @@
   <ItemGroup>
     <ClCompile Include="Bus\Bus.cpp" />
     <ClCompile Include="Bus\BusDevice.cpp" />
+    <ClCompile Include="Bus\IODevice.cpp" />
     <ClCompile Include="CPU6502\CPU6502.cpp" />
     <ClCompile Include="nes_emulator.cpp" />
+    <ClCompile Include="RAM\RAM.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus\Bus.h" />
     <ClInclude Include="Bus\BusDevice.h" />
+    <ClInclude Include="Bus\IODevice.h" />
     <ClInclude Include="CPU6502\CPU6502.h" />
+    <ClInclude Include="RAM\RAM.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

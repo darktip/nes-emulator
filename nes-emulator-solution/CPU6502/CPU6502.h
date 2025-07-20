@@ -26,10 +26,10 @@ private:
     
 public:
     CPU6502();
-    ~CPU6502();
+    ~CPU6502() override;
     
-    void write(uint16_t addr, uint8_t val);
-    uint8_t read(uint16_t addr);
+    void write(uint16_t addr, uint8_t val) override;
+    uint8_t read(uint16_t addr) override;
     
     void IRQ();     // Interrupt request signal
     void NMI();     // Non-maskable interrupt

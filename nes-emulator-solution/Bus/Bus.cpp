@@ -1,17 +1,14 @@
 ﻿#include "Bus.h"
 
-bool Bus::isValidAddress(uint16_t addr)
+Bus::Bus(BusDevice* cpu, std::vector<BusDevice>* connectedDevices)
 {
-    return addr >= 0x0000 && addr <= 0xFFFF;
-}
+    this->cpu = cpu;
+    this->connectedDevices = connectedDevices;
 
-Bus::Bus()
-{
-    cpu.connect(this);
-
-    for (auto &t : ram)
+    this->cpu->connect(this);
+    for (auto &t : *this->connectedDevices)
     {
-        t = 0x00;
+        t.connect(this);
     }
 }
 
@@ -19,17 +16,29 @@ Bus::~Bus() = default;
 
 void Bus::write(uint16_t addr, uint8_t val)
 {
-    if (isValidAddress(addr))
+    if (this->isValidAddress(addr))
     {
-        ram[addr] = val;
+        for (auto &t : *connectedDevices)
+        {
+            if (t.isValidAddress(addr))
+            {
+                t.write(addr, val);   
+            }
+        }
     }
 }
 
 uint8_t Bus::read(uint16_t addr)
 {
-    if (isValidAddress(addr))
+    if (this->isValidAddress(addr))
     {
-        return ram[addr];
+        for (auto &t : *connectedDevices)
+        {
+            if (t.isValidAddress(addr))
+            {
+                return t.read(addr);   
+            }
+        }
     }
 
     return 0x00;

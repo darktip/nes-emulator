@@ -1,5 +1,4 @@
 ﻿#include "CPU6502.h"
-#include "../Bus/Bus.h"
 
 void CPU6502::resetInternal()
 {

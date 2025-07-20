@@ -1,20 +1,19 @@
 ﻿#pragma once
-#include <array>
 #include <cstdint>
+#include <vector>
 
-#include "../CPU6502/CPU6502.h"
+#include "BusDevice.h"
 
-class Bus
+class Bus : IODevice
 {
 private:
-    std::array<uint8_t, 64 * 1024> ram; // 64KB of RAM for testing. Temporary entity
-    CPU6502 cpu;
+    BusDevice* cpu;
+    std::vector<BusDevice>* connectedDevices;
 
-    bool isValidAddress(uint16_t addr);
 public:
-    Bus();
-    ~Bus();
+    Bus(BusDevice* cpu, std::vector<BusDevice>* connectedDevices);
+    ~Bus() override;
     
-    void write(uint16_t addr, uint8_t val);
-    uint8_t read(uint16_t addr);
+    void write(uint16_t addr, uint8_t val) override;
+    uint8_t read(uint16_t addr) override;
 };

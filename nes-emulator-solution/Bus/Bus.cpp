@@ -28,7 +28,7 @@ void Bus::write(uint16_t addr, uint8_t val)
     }
 }
 
-uint8_t Bus::read(uint16_t addr)
+uint8_t Bus::read(uint16_t addr) const
 {
     if (this->isValidAddress(addr))
     {

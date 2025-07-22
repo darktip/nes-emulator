@@ -18,7 +18,7 @@ private:
     uint8_t status_reg = 0x00;  // Status register
     
     uint8_t fetch = 0x00;
-    uint8_t cycles = 0;         // Number of cycles left to be executed
+    uint8_t opCycles = 0;       // Number of cycles left to be executed
     uint64_t cyclesCount = 0;   // Number of cycles since cpu start
     
     void resetInternal();       // Resets everything to zero
@@ -29,7 +29,7 @@ public:
     ~CPU6502() override;
     
     void write(uint16_t addr, uint8_t val) override;
-    uint8_t read(uint16_t addr) override;
+    uint8_t read(uint16_t addr) const override;
     
     void IRQ();     // Interrupt request signal
     void NMI();     // Non-maskable interrupt

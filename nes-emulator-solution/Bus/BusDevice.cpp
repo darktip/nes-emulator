@@ -1,6 +1,6 @@
 ﻿#include "BusDevice.h"
 
-bool BusDevice::isValidAddress(uint16_t addr)
+bool BusDevice::isValidAddress(uint16_t addr) const
 {
     return addr >= 0x0000 && addr <= 0xFFFF;
 }

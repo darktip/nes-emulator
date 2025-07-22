@@ -1,5 +1,7 @@
 ﻿#include "CPU6502.h"
 
+#include "../Utils/address_utils.h"
+
 void CPU6502::resetInternal()
 {
     a_reg = 0x00;
@@ -10,7 +12,7 @@ void CPU6502::resetInternal()
     status_reg = 0x00;
 
     fetch = 0x00;
-    cycles = 0;
+    opCycles = 0;
     cyclesCount = 0;
 }
 
@@ -303,7 +305,7 @@ void CPU6502::write(uint16_t addr, uint8_t val)
     bus->write(addr, val);
 }
 
-uint8_t CPU6502::read(uint16_t addr)
+uint8_t CPU6502::read(uint16_t addr) const
 {
     return bus->read(addr);
 }
@@ -323,4 +325,93 @@ void CPU6502::setStatusFlag(StatusRegistryFlags flag, bool predicate)
 uint8_t CPU6502::getStatusFlag(StatusRegistryFlags flag)
 {
     return status_reg & flag;
+}
+
+uint16_t CPU6502::ACC(uint8_t& cycles)
+{
+    uint16_t addr = a_reg;
+    return addr;
+}
+
+uint16_t CPU6502::ABS(uint8_t& cycles)
+{
+    uint16_t addr = readFullAddressWithIncrementPC(*bus, pc_reg);
+    return addr;
+}
+
+uint16_t CPU6502::ABX(uint8_t& cycles)
+{
+    uint16_t addr = readFullAddressWithIncrementPC(*bus, pc_reg);
+    uint16_t shifted_addr = addr + x_reg;
+    if (!isAddressOnSamePage(addr, shifted_addr))
+    {
+        cycles++;
+    }
+    return shifted_addr;
+}
+
+uint16_t CPU6502::ABY(uint8_t& cycles)
+{
+    uint16_t addr = readFullAddressWithIncrementPC(*bus, pc_reg);
+    uint16_t shifted_addr = addr + y_reg;
+    if (!isAddressOnSamePage(addr, shifted_addr))
+    {
+        cycles++;
+    }
+    return shifted_addr;
+}
+
+uint16_t CPU6502::IMM(uint8_t& cycles)
+{
+    uint16_t addr = pc_reg++;
+    return addr;
+}
+
+uint16_t CPU6502::IMP(uint8_t& cycles)
+{
+    return 0;
+}
+
+uint16_t CPU6502::IND(uint8_t& cycles)
+{
+    uint16_t pointer_addr = readFullAddressWithIncrementPC(*bus, pc_reg);
+    if ((pointer_addr & LO_BYTE_MASK) == LO_BYTE_MASK) // Simulate bug when addressing 0x--FF
+    {
+        uint16_t lo = read(pointer_addr);
+        uint16_t hi = read(pointer_addr & HI_BYTE_MASK);
+        uint16_t addr = static_cast<uint16_t>(hi << HI_BYTE_SHIFT) | lo;
+        return addr;
+    }
+    else
+    {
+        uint16_t addr = readFullAddress(*bus, pointer_addr);
+        return addr;   
+    }
+}
+
+uint16_t CPU6502::INX(uint8_t& cycles)
+{
+    uint16_t zp_pointer = read(pc_reg++);
+    uint16_t x = x_reg;
+    uint16_t lo = read((zp_pointer + x) & LO_BYTE_MASK);
+    uint16_t hi = read((zp_pointer + x + 1) & LO_BYTE_MASK);
+    uint16_t addr = static_cast<uint16_t>(hi << HI_BYTE_SHIFT) | lo;
+    return addr;
+}
+
+uint16_t CPU6502::INY(uint8_t& cycles)
+{
+    uint16_t zp_pointer = read(pc_reg++);
+    uint16_t addr = readFullAddress(*bus, zp_pointer);
+    uint16_t shifted_addr = addr + y_reg;
+    if (!isAddressOnSamePage(addr, shifted_addr))
+    {
+        cycles++;
+    }
+    return shifted_addr;
+}
+
+uint16_t CPU6502::REL(uint8_t& cycles)
+{
+    return 0;
 }

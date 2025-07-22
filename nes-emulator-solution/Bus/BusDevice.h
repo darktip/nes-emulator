@@ -6,6 +6,6 @@ class BusDevice : public IODevice
 protected:
     IODevice* bus;
 public:
-    bool isValidAddress(uint16_t addr) override;
+    bool isValidAddress(uint16_t addr) const override;
     void connect(IODevice* bus);
 };

@@ -1,6 +1,7 @@
 ﻿#include "CPU6502.h"
 
 #include "../Utils/address_utils.h"
+#include "../Utils/bitwise_utils.h"
 
 void CPU6502::resetInternal()
 {
@@ -413,5 +414,33 @@ uint16_t CPU6502::INY(uint8_t& cycles)
 
 uint16_t CPU6502::REL(uint8_t& cycles)
 {
-    return 0;
+    uint16_t addr = pc_reg;
+    uint8_t addr_shift = read(pc_reg++);
+    uint16_t shift16bit = addr_shift;
+    if (isSigned(addr_shift))
+    {
+        shift16bit |= HI_BYTE_MASK;
+    }
+    addr += shift16bit;
+    return addr;
+}
+
+uint16_t CPU6502::ZPG(uint8_t& cycles)
+{
+    uint16_t zpg_addr = read(pc_reg++);
+    return zpg_addr;
+}
+
+uint16_t CPU6502::ZPX(uint8_t& cycles)
+{
+    uint16_t zpg_addr = read(pc_reg++);
+    uint16_t addr = (zpg_addr + x_reg) & LO_BYTE_MASK;
+    return addr;
+}
+
+uint16_t CPU6502::ZPY(uint8_t& cycles)
+{
+    uint16_t zpg_addr = read(pc_reg++);
+    uint16_t addr = (zpg_addr + y_reg) & LO_BYTE_MASK;
+    return addr;
 }

@@ -18,8 +18,8 @@ private:
     uint8_t status_reg = 0x00;  // Status register
     
     uint8_t fetch = 0x00;
-    uint8_t opCycles = 0;       // Number of cycles left to be executed
-    uint64_t cyclesCount = 0;   // Number of cycles since cpu start
+    uint8_t opCyclesCount = 0;        // Number of cycles left to be executed
+    uint64_t globalCyclesCount = 0;   // Number of cycles since cpu start
     
     void resetInternal();       // Resets everything to zero
     void initializeOpcodes();   // Generates opcodes lookup map
@@ -58,6 +58,7 @@ private:
         std::string mnemonic;                                           // Mnemonic to use for debugging purposes
         uint16_t(CPU6502::*addressing)(uint8_t& cycles);                // Function pointer for addressing mode
         void(CPU6502::*operation)(uint16_t address, uint8_t& cycles);   // Function pointer for operation
+        uint8_t cycles;                                                 // Number of cycles to execute
     };
 
     Instruction opcodes[INSTRUCTION_SET_SIZE];

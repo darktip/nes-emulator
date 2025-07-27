@@ -352,14 +352,13 @@ uint16_t CPU6502::INY(uint8_t& cycles)
 
 uint16_t CPU6502::REL(uint8_t& cycles)
 {
-    uint16_t addr = pc_reg;
     uint8_t addr_shift = read(pc_reg++);
     uint16_t shift16bit = addr_shift;
     if (isSigned(addr_shift))
     {
         shift16bit |= HI_BYTE_MASK;
     }
-    addr += shift16bit;
+    uint16_t addr = pc_reg + shift16bit;
     return addr;
 }
 

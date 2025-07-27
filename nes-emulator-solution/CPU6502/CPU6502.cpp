@@ -339,7 +339,9 @@ uint16_t CPU6502::INX(uint8_t& cycles)
 uint16_t CPU6502::INY(uint8_t& cycles)
 {
     uint16_t zp_pointer = read(pc_reg++);
-    uint16_t addr = readFullAddress(*bus, zp_pointer);
+    uint16_t lo = read((zp_pointer) & LO_BYTE_MASK);
+    uint16_t hi = read((zp_pointer + 1) & LO_BYTE_MASK);
+    uint16_t addr = static_cast<uint16_t>(hi << HI_BYTE_SHIFT) | lo;
     uint16_t shifted_addr = addr + y_reg;
     if (!isAddressOnSamePage(addr, shifted_addr))
     {

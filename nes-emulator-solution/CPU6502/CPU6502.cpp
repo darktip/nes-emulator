@@ -12,7 +12,8 @@ void CPU6502::resetInternal()
     sp_reg = 0x00;
     status_reg = 0x00;
 
-    fetch = 0x00;
+    impliedFlag = false;
+    impliedValue = 0x00;
     opCyclesCount = 0;
     globalCyclesCount = 0;
 }
@@ -229,6 +230,8 @@ bool CPU6502::clock()
 {
     if (opCyclesCount == 0)
     {
+        clearImpliedFlag();
+        
         uint8_t opcode = read(pc_reg++);
         Instruction instruction = opcodes[opcode];
 
@@ -259,15 +262,61 @@ void CPU6502::setStatusFlag(StatusRegistryFlags flag, bool predicate)
     }
 }
 
-uint8_t CPU6502::getStatusFlag(StatusRegistryFlags flag)
+bool CPU6502::getStatusFlag(StatusRegistryFlags flag)
 {
-    return status_reg & flag;
+    return (status_reg & flag) != 0;
 }
 
+void CPU6502::clearImpliedFlag()
+{
+    impliedFlag = false;
+}
+
+void CPU6502::setImpliedFlag(uint8_t value)
+{
+    impliedFlag = true;
+    impliedValue = value;
+}
+
+uint8_t CPU6502::fetch(uint16_t address)
+{
+    if (impliedFlag)
+    {
+        return impliedValue;
+    }
+    uint8_t valueFromAddress = read(address);
+    return valueFromAddress;
+}
+
+void CPU6502::submit(uint16_t address, uint8_t value)
+{
+    if (impliedFlag)
+    {
+        a_reg = value;
+    }
+    else
+    {
+        write(address, value);
+    }
+}
+
+void CPU6502::branch(uint8_t relAddr, uint8_t& cycles)
+{
+    cycles++;
+    uint16_t currentPC = pc_reg;
+    uint16_t nextPC = pc_reg + relAddr;
+    if (!isAddressOnSamePage(currentPC, nextPC))
+    {
+        cycles++;
+    }
+    pc_reg = nextPC;
+}
+
+// Addressing modes
 uint16_t CPU6502::ACC(uint8_t& cycles)
 {
-    uint16_t addr = a_reg;
-    return addr;
+    setImpliedFlag(a_reg);
+    return 0;
 }
 
 uint16_t CPU6502::ABS(uint8_t& cycles)
@@ -306,6 +355,7 @@ uint16_t CPU6502::IMM(uint8_t& cycles)
 
 uint16_t CPU6502::IMP(uint8_t& cycles)
 {
+    setImpliedFlag(a_reg);
     return 0;
 }
 
@@ -358,8 +408,7 @@ uint16_t CPU6502::REL(uint8_t& cycles)
     {
         shift16bit |= HI_BYTE_MASK;
     }
-    uint16_t addr = pc_reg + shift16bit;
-    return addr;
+    return shift16bit;
 }
 
 uint16_t CPU6502::ZPG(uint8_t& cycles)
@@ -380,4 +429,97 @@ uint16_t CPU6502::ZPY(uint8_t& cycles)
     uint16_t zpg_addr = read(pc_reg++);
     uint16_t addr = (zpg_addr + y_reg) & LO_BYTE_MASK;
     return addr;
+}
+
+// Operations
+void CPU6502::ADC(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t a = a_reg;
+    uint8_t c = getStatusFlag(Carry) ? 1 : 0;
+    uint16_t result_16bit = memory + a + c;
+    uint8_t result = result_16bit & LO_BYTE_MASK;
+
+    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Carry, isCarryFromUnsignedAdd(result_16bit));
+    setStatusFlag(Overflow, isOverflowFromSignedAdd(a, memory, result));
+    
+    a_reg = result;
+}
+
+void CPU6502::AND(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t result = memory & a_reg;
+    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Negative, isSigned(result));
+    a_reg = result;
+}
+
+void CPU6502::ASL(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t result = memory << 1;
+    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Carry, testBitMask8Bit(BIT_7, memory));
+    submit(address, result);
+}
+
+void CPU6502::BCC(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Carry) == true)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::BCS(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Carry) == false)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::BEQ(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Zero) == false)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::BIT(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t result = a_reg & memory;
+    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Negative, testBitMask8Bit(BIT_7, memory));
+    setStatusFlag(Overflow, testBitMask8Bit(BIT_6, memory));
+}
+
+void CPU6502::BMI(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Negative) == false)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::BNE(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Zero) == true)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::BPL(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Negative) == true)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
 }

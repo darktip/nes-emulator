@@ -17,9 +17,16 @@ private:
     uint8_t sp_reg = 0x00;      // Stack Pointer
     uint8_t status_reg = 0x00;  // Status register
     
-    uint8_t fetch = 0x00;
     uint8_t opCyclesCount = 0;        // Number of cycles left to be executed
     uint64_t globalCyclesCount = 0;   // Number of cycles since cpu start
+
+    bool impliedFlag = false;         // Flag is set True when value is implied and not read from address
+    uint8_t impliedValue = 0;         // The implied value to use instead of an address
+    void clearImpliedFlag();
+    void setImpliedFlag(uint8_t value);
+    
+    uint8_t fetch(uint16_t address);                // Fetches data either from memory or accumulator
+    void submit(uint16_t address, uint8_t value);   // Writes data either to memory or accumulator
     
     void resetInternal();       // Resets everything to zero
     void initializeOpcodes();   // Generates opcodes lookup map
@@ -51,8 +58,8 @@ private:
     };
 
     void setStatusFlag(StatusRegistryFlags flag, bool predicate);
-    uint8_t getStatusFlag(StatusRegistryFlags flag);
-
+    bool getStatusFlag(StatusRegistryFlags flag);
+    
     struct Instruction
     {
         std::string mnemonic;                                           // Mnemonic to use for debugging purposes
@@ -62,6 +69,8 @@ private:
     };
 
     Instruction opcodes[INSTRUCTION_SET_SIZE];
+
+    void branch(uint8_t relAddr, uint8_t& cycles); // Helper function to execute branching
 
     // Addressing modes
     uint16_t ACC(uint8_t& cycles); // accumulator

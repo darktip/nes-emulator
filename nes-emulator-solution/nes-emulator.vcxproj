@@ -161,6 +161,7 @@
     <ClCompile Include="Bus\BusDevice.cpp" />
     <ClCompile Include="Bus\IODevice.cpp" />
     <ClCompile Include="CPU6502\CPU6502.cpp" />
+    <ClCompile Include="CPU6502\CPU6502Stack.cpp" />
     <ClCompile Include="nes_emulator.cpp" />
     <ClCompile Include="RAM\RAM.cpp" />
     <ClCompile Include="Utils\address_utils.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Bus\BusDevice.h" />
     <ClInclude Include="Bus\IODevice.h" />
     <ClInclude Include="CPU6502\CPU6502.h" />
+    <ClInclude Include="CPU6502\CPU6502Stack.h" />
     <ClInclude Include="RAM\RAM.h" />
     <ClInclude Include="Utils\address_utils.h" />
     <ClInclude Include="Utils\bitwise_utils.h" />

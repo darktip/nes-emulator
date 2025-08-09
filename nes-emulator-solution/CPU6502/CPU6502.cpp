@@ -3,6 +3,8 @@
 #include "../Utils/address_utils.h"
 #include "../Utils/bitwise_utils.h"
 
+using namespace nes;
+
 void CPU6502::resetInternal()
 {
     a_reg = 0x00;
@@ -208,7 +210,7 @@ void CPU6502::initializeOpcodes()
     opcodes[0xFE] = Instruction{"INC (ABX)", &CPU6502::ABX, &CPU6502::INC, 7};
 }
 
-CPU6502::CPU6502()
+CPU6502::CPU6502() : stack(this, &sp_reg)
 {
     resetInternal();
     initializeOpcodes();
@@ -522,4 +524,11 @@ void CPU6502::BPL(uint16_t address, uint8_t& cycles)
     {
         branch(static_cast<uint8_t>(address), cycles);
     }
+}
+
+void CPU6502::BRK(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(BRKCommand, true);
+    uint16_t addr = pc_reg + 2;
+    uint8_t sr = status_reg;
 }

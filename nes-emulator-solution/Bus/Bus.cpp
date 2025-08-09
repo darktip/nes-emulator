@@ -1,5 +1,7 @@
 ﻿#include "Bus.h"
 
+using namespace nes;
+
 Bus::Bus(BusDevice* cpu, std::vector<BusDevice>* connectedDevices)
 {
     this->cpu = cpu;

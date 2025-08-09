@@ -1,5 +1,7 @@
 ﻿#include "RAM.h"
 
+using namespace nes;
+
 RAM::RAM()
 {
     for (auto &t : ram)

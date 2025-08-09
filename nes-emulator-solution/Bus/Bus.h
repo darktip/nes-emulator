@@ -1,19 +1,22 @@
 ﻿#pragma once
+
 #include <cstdint>
 #include <vector>
 
 #include "BusDevice.h"
 
-class Bus : IODevice
+namespace nes
 {
-private:
-    BusDevice* cpu;
-    std::vector<BusDevice>* connectedDevices;
+    class Bus : IODevice
+    {
+        BusDevice* cpu;
+        std::vector<BusDevice>* connectedDevices;
 
-public:
-    Bus(BusDevice* cpu, std::vector<BusDevice>* connectedDevices);
-    ~Bus() override;
-    
-    void write(uint16_t addr, uint8_t val) override;
-    uint8_t read(uint16_t addr) const override;
-};
+    public:
+        Bus(BusDevice* cpu, std::vector<BusDevice>* connectedDevices);
+        ~Bus() override;
+
+        void write(uint16_t addr, uint8_t val) override;
+        uint8_t read(uint16_t addr) const override;
+    };
+}

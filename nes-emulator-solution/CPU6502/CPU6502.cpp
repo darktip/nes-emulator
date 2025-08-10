@@ -269,6 +269,20 @@ bool CPU6502::getStatusFlag(StatusRegistryFlags flag)
     return (status_reg & flag) != 0;
 }
 
+void CPU6502::pushAddressToStack(uint16_t addr)
+{
+    stack.push(addr >> HI_BYTE_SHIFT & LO_BYTE_MASK);
+    stack.push(addr & LO_BYTE_MASK);
+}
+
+uint16_t CPU6502::popAddressFromStack()
+{
+    uint8_t lo_byte = stack.pop();
+    uint8_t hi_byte = stack.pop();
+    uint16_t addr = lo_byte | hi_byte << HI_BYTE_SHIFT;
+    return addr;
+}
+
 void CPU6502::clearImpliedFlag()
 {
     impliedFlag = false;
@@ -528,7 +542,14 @@ void CPU6502::BPL(uint16_t address, uint8_t& cycles)
 
 void CPU6502::BRK(uint16_t address, uint8_t& cycles)
 {
-    setStatusFlag(BRKCommand, true);
-    uint16_t addr = pc_reg + 2;
-    uint8_t sr = status_reg;
+    pc_reg++;
+    uint8_t sr = status_reg | BRKCommand | Unused; // bit 5 always set when pushing SR
+    
+    pushAddressToStack(pc_reg);
+    stack.push(sr);
+
+    setStatusFlag(IRQDisable, true);
+    
+    uint16_t next_pc = readFullAddress(*bus, SYSTEM_VECTOR_IRQ);
+    pc_reg = next_pc;
 }

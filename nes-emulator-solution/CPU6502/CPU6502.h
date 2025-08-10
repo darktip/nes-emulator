@@ -26,7 +26,9 @@ namespace nes
         uint8_t opCyclesCount = 0;        // Number of cycles left to be executed
         uint64_t globalCyclesCount = 0;   // Number of cycles since cpu start
     
-        CPU6502Stack stack;               // Stack helper class
+        CPU6502Stack stack;                     // Stack helper class
+        void pushAddressToStack(uint16_t addr); // Helper functions for addresses
+        uint16_t popAddressFromStack();         //
         
         bool impliedFlag = false;         // Flag is set True when value is implied and not read from address
         uint8_t impliedValue = 0;         // The implied value to use instead of an address

@@ -6,9 +6,8 @@ using namespace nes;
 
 uint16_t nes::readFullAddressWithIncrementPC(const IODevice& io, uint16_t& programCounter)
 {
-    uint16_t low_byte = io.read(programCounter++);
-    uint16_t high_byte = io.read(programCounter++);
-    uint16_t result = static_cast<uint16_t>(high_byte << HI_BYTE_SHIFT) | low_byte;
+    uint16_t result = readFullAddress(io, programCounter);
+    programCounter += 2;
     return result;
 }
 

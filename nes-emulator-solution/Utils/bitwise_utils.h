@@ -18,6 +18,7 @@ namespace nes
     constexpr uint16_t CARRY_TEST = 0x00FF;
 
     bool isSigned(uint8_t val);
+    bool isZero(uint8_t val);
     bool testBitMask8Bit(uint8_t bit, uint8_t value);
     bool testBitMask16Bit(uint16_t bit, uint16_t value);
     bool isCarryFromUnsignedAdd(uint16_t value);

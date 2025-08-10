@@ -7,6 +7,11 @@ bool nes::isSigned(uint8_t val)
     return val & SIGN_BIT_INT8;
 }
 
+bool nes::isZero(uint8_t val)
+{
+    return val == 0;
+}
+
 bool nes::testBitMask8Bit(uint8_t bit, uint8_t value)
 {
     return (bit & value) > 0;

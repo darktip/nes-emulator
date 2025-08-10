@@ -81,6 +81,7 @@ namespace nes
         Instruction opcodes[INSTRUCTION_SET_SIZE];
     
         void branch(uint8_t relAddr, uint8_t& cycles); // Helper function to execute branching
+        void compare(uint16_t addr, uint8_t reg); // Helper function for comparing memory with register
     
         // Addressing modes
         uint16_t ACC(uint8_t& cycles); // accumulator

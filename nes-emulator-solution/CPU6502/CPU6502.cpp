@@ -328,6 +328,16 @@ void CPU6502::branch(uint8_t relAddr, uint8_t& cycles)
     pc_reg = nextPC;
 }
 
+void CPU6502::compare(uint16_t addr, uint8_t reg)
+{
+    uint8_t memory = fetch(addr);
+    uint8_t result = reg - memory;
+
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Zero, isZero(result));
+    setStatusFlag(Carry, reg >= memory);
+}
+
 // Addressing modes
 uint16_t CPU6502::ACC(uint8_t& cycles)
 {
@@ -456,7 +466,7 @@ void CPU6502::ADC(uint16_t address, uint8_t& cycles)
     uint16_t result_16bit = memory + a + c;
     uint8_t result = result_16bit & LO_BYTE_MASK;
 
-    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Zero, isZero(result));
     setStatusFlag(Negative, isSigned(result));
     setStatusFlag(Carry, isCarryFromUnsignedAdd(result_16bit));
     setStatusFlag(Overflow, isOverflowFromSignedAdd(a, memory, result));
@@ -468,7 +478,7 @@ void CPU6502::AND(uint16_t address, uint8_t& cycles)
 {
     uint8_t memory = fetch(address);
     uint8_t result = memory & a_reg;
-    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Zero, isZero(result));
     setStatusFlag(Negative, isSigned(result));
     a_reg = result;
 }
@@ -477,7 +487,7 @@ void CPU6502::ASL(uint16_t address, uint8_t& cycles)
 {
     uint8_t memory = fetch(address);
     uint8_t result = memory << 1;
-    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Zero, isZero(result));
     setStatusFlag(Negative, isSigned(result));
     setStatusFlag(Carry, testBitMask8Bit(BIT_7, memory));
     submit(address, result);
@@ -511,7 +521,7 @@ void CPU6502::BIT(uint16_t address, uint8_t& cycles)
 {
     uint8_t memory = fetch(address);
     uint8_t result = a_reg & memory;
-    setStatusFlag(Zero, result == 0);
+    setStatusFlag(Zero, isZero(result));
     setStatusFlag(Negative, testBitMask8Bit(BIT_7, memory));
     setStatusFlag(Overflow, testBitMask8Bit(BIT_6, memory));
 }
@@ -552,4 +562,79 @@ void CPU6502::BRK(uint16_t address, uint8_t& cycles)
     
     uint16_t next_pc = readFullAddress(*bus, SYSTEM_VECTOR_IRQ);
     pc_reg = next_pc;
+}
+
+void CPU6502::BVC(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Overflow) == false)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::BVS(uint16_t address, uint8_t& cycles)
+{
+    if (getStatusFlag(Overflow) == true)
+    {
+        branch(static_cast<uint8_t>(address), cycles);
+    }
+}
+
+void CPU6502::CLC(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(Carry, false);
+}
+
+void CPU6502::CLD(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(DecimalMode, false);
+}
+
+void CPU6502::CLI(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(IRQDisable, false);
+}
+
+void CPU6502::CLV(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(Overflow, false);
+}
+
+void CPU6502::CMP(uint16_t address, uint8_t& cycles)
+{
+    compare(address, a_reg);
+}
+
+void CPU6502::CPX(uint16_t address, uint8_t& cycles)
+{
+    compare(address, x_reg);
+}
+
+void CPU6502::CPY(uint16_t address, uint8_t& cycles)
+{
+    compare(address, y_reg);
+}
+
+void CPU6502::DEC(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    memory--;
+    
+    setStatusFlag(Negative, isSigned(memory));
+    setStatusFlag(Zero, isZero(memory));
+    submit(address, memory);
+}
+
+void CPU6502::DEX(uint16_t address, uint8_t& cycles)
+{
+    x_reg--;
+    setStatusFlag(Negative, isSigned(x_reg));
+    setStatusFlag(Zero, isZero(x_reg));
+}
+
+void CPU6502::DEY(uint16_t address, uint8_t& cycles)
+{
+    y_reg--;
+    setStatusFlag(Negative, isSigned(y_reg));
+    setStatusFlag(Zero, isZero(y_reg));
 }

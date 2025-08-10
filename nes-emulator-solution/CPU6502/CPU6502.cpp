@@ -638,3 +638,100 @@ void CPU6502::DEY(uint16_t address, uint8_t& cycles)
     setStatusFlag(Negative, isSigned(y_reg));
     setStatusFlag(Zero, isZero(y_reg));
 }
+
+void CPU6502::EOR(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t result = a_reg ^ memory;
+    
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Zero, isZero(result));
+    a_reg = result;
+}
+
+void CPU6502::INC(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    memory++;
+    
+    setStatusFlag(Negative, isSigned(memory));
+    setStatusFlag(Zero, isZero(memory));
+    submit(address, memory);
+}
+
+void CPU6502::INX(uint16_t address, uint8_t& cycles)
+{
+    x_reg++;
+    setStatusFlag(Negative, isSigned(x_reg));
+    setStatusFlag(Zero, isZero(x_reg));
+}
+
+void CPU6502::INY(uint16_t address, uint8_t& cycles)
+{
+    y_reg++;
+    setStatusFlag(Negative, isSigned(y_reg));
+    setStatusFlag(Zero, isZero(y_reg));
+}
+
+void CPU6502::JMP(uint16_t address, uint8_t& cycles)
+{
+    pc_reg = address;
+}
+
+void CPU6502::JSR(uint16_t address, uint8_t& cycles)
+{
+    pushAddressToStack(pc_reg - 1);
+    pc_reg = address;
+}
+
+void CPU6502::LDA(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+
+    setStatusFlag(Negative, isSigned(memory));
+    setStatusFlag(Zero, isZero(memory));
+    a_reg = memory;
+}
+
+void CPU6502::LDX(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+
+    setStatusFlag(Negative, isSigned(memory));
+    setStatusFlag(Zero, isZero(memory));
+    x_reg = memory;
+}
+
+void CPU6502::LDY(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+
+    setStatusFlag(Negative, isSigned(memory));
+    setStatusFlag(Zero, isZero(memory));
+    y_reg = memory;
+}
+
+void CPU6502::LSR(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t result = memory >> 1;
+    setStatusFlag(Zero, isZero(result));
+    setStatusFlag(Negative, false);
+    setStatusFlag(Carry, testBitMask8Bit(BIT_0, memory));
+    submit(address, result);
+}
+
+void CPU6502::NOP(uint16_t address, uint8_t& cycles)
+{
+    // Place your Ad here
+}
+
+void CPU6502::ORA(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t result = a_reg | memory;
+    
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Zero, isZero(result));
+    a_reg = result;
+}

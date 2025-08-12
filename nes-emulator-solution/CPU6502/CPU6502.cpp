@@ -735,3 +735,52 @@ void CPU6502::ORA(uint16_t address, uint8_t& cycles)
     setStatusFlag(Zero, isZero(result));
     a_reg = result;
 }
+
+void CPU6502::PHA(uint16_t address, uint8_t& cycles)
+{
+    stack.push(a_reg);
+}
+
+void CPU6502::PHP(uint16_t address, uint8_t& cycles)
+{
+    uint8_t sr = status_reg | BRKCommand | Unused; // B, U flag should be set for this instruction
+    stack.push(sr);
+}
+
+void CPU6502::PLA(uint16_t address, uint8_t& cycles)
+{
+    uint8_t a = stack.pop();
+    setStatusFlag(Zero, isZero(a));
+    setStatusFlag(Negative, isSigned(a));
+    a_reg = a;
+}
+
+void CPU6502::PLP(uint16_t address, uint8_t& cycles)
+{
+    uint8_t sr = (stack.pop() & ~BRKCommand) | Unused; // B flag is ignored, U flag is always set
+    status_reg = sr;
+}
+
+void CPU6502::ROL(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t carry = getStatusFlag(Carry) ? 1 : 0;
+    uint8_t result = memory << 1 | carry;
+    
+    setStatusFlag(Zero, isZero(result));
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Carry, testBitMask8Bit(BIT_7, memory));
+    submit(address, result);
+}
+
+void CPU6502::ROR(uint16_t address, uint8_t& cycles)
+{
+    uint8_t memory = fetch(address);
+    uint8_t carry = getStatusFlag(Carry) ? 1 : 0;
+    uint8_t result = memory >> 1 | carry << 7;
+    
+    setStatusFlag(Zero, isZero(result));
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Carry, testBitMask8Bit(BIT_0, memory));
+    submit(address, result);
+}

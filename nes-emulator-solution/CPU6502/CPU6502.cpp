@@ -784,3 +784,122 @@ void CPU6502::ROR(uint16_t address, uint8_t& cycles)
     setStatusFlag(Carry, testBitMask8Bit(BIT_0, memory));
     submit(address, result);
 }
+
+void CPU6502::RTI(uint16_t address, uint8_t& cycles)
+{
+    uint8_t sr = (stack.pop() & ~BRKCommand) | Unused; // B flag is ignored, U flag is always set
+    status_reg = sr;
+    uint16_t pc = popAddressFromStack();
+    pc_reg = pc;
+}
+
+void CPU6502::RTS(uint16_t address, uint8_t& cycles)
+{
+    uint16_t pc = popAddressFromStack();
+    pc_reg = pc + 1;
+}
+
+void CPU6502::SBC(uint16_t address, uint8_t& cycles)
+{
+    // SBC operation should be A -> A - M - (1 - C)
+    // But it can be simplified to A -> A + ~M + C
+    // Which is exactly the same as addition
+    uint8_t memory = fetch(address);
+    uint8_t a = a_reg;
+    uint8_t c = getStatusFlag(Carry) ? 1 : 0;
+    
+    uint8_t invM = ~memory;
+    uint16_t result_16bit = a + invM + c;
+    uint8_t result = result_16bit & LO_BYTE_MASK;
+
+    setStatusFlag(Zero, isZero(result));
+    setStatusFlag(Negative, isSigned(result));
+    setStatusFlag(Carry, isCarryFromUnsignedAdd(result_16bit));
+    setStatusFlag(Overflow, isOverflowFromSignedAdd(a, invM, result));
+    
+    a_reg = result;
+}
+
+void CPU6502::SEC(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(Carry, true);
+}
+
+void CPU6502::SED(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(DecimalMode, true);
+}
+
+void CPU6502::SEI(uint16_t address, uint8_t& cycles)
+{
+    setStatusFlag(IRQDisable, true);
+}
+
+void CPU6502::STA(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = a_reg;
+    write(address, value);
+}
+
+void CPU6502::STX(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = x_reg;
+    write(address, value);
+}
+
+void CPU6502::STY(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = y_reg;
+    write(address, value);
+}
+
+void CPU6502::TAX(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = a_reg;
+    x_reg = value;
+    setStatusFlag(Zero, isZero(value));
+    setStatusFlag(Negative, isSigned(value));
+}
+
+void CPU6502::TAY(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = a_reg;
+    y_reg = value;
+    setStatusFlag(Zero, isZero(value));
+    setStatusFlag(Negative, isSigned(value));
+}
+
+void CPU6502::TSX(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = sp_reg;
+    x_reg = value;
+    setStatusFlag(Zero, isZero(value));
+    setStatusFlag(Negative, isSigned(value));
+}
+
+void CPU6502::TXA(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = x_reg;
+    a_reg = value;
+    setStatusFlag(Zero, isZero(value));
+    setStatusFlag(Negative, isSigned(value));
+}
+
+void CPU6502::TXS(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = x_reg;
+    sp_reg = value;
+}
+
+void CPU6502::TYA(uint16_t address, uint8_t& cycles)
+{
+    uint8_t value = y_reg;
+    a_reg = value;
+    setStatusFlag(Zero, isZero(value));
+    setStatusFlag(Negative, isSigned(value));
+}
+
+void CPU6502::ILL(uint16_t address, uint8_t& cycles)
+{
+    // Do nothing. No illigal opcodes implementation for this NES emulator
+}

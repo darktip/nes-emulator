@@ -12,10 +12,6 @@ namespace nes
     {
         static constexpr int INSTRUCTION_SET_SIZE = 256;
         
-        static constexpr uint16_t SYSTEM_VECTOR_NMI = 0xFFFA;
-        static constexpr uint16_t SYSTEM_VECTOR_RES = 0xFFFC;
-        static constexpr uint16_t SYSTEM_VECTOR_IRQ = 0xFFFE;
-        
         uint8_t a_reg = 0x00;       // Accumulator register
         uint8_t x_reg = 0x00;       // X register
         uint8_t y_reg = 0x00;       // Y register
@@ -42,6 +38,10 @@ namespace nes
         void initializeOpcodes();   // Generates opcodes lookup map
         
     public:
+        static constexpr uint16_t SYSTEM_VECTOR_NMI = 0xFFFA;
+        static constexpr uint16_t SYSTEM_VECTOR_RES = 0xFFFC;
+        static constexpr uint16_t SYSTEM_VECTOR_IRQ = 0xFFFE;
+        
         CPU6502();
         ~CPU6502() override;
         
@@ -80,8 +80,8 @@ namespace nes
     
         Instruction opcodes[INSTRUCTION_SET_SIZE];
     
-        void branch(uint8_t relAddr, uint8_t& cycles); // Helper function to execute branching
-        void compare(uint16_t addr, uint8_t reg); // Helper function for comparing memory with register
+        void branch(uint16_t relAddr, uint8_t& cycles);  // Helper function to execute branching
+        void compare(uint16_t addr, uint8_t reg);       // Helper function for comparing memory with register
     
         // Addressing modes
         uint16_t ACC(uint8_t& cycles); // accumulator

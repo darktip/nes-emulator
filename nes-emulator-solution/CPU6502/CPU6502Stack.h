@@ -13,6 +13,7 @@ namespace nes
     public:
         CPU6502Stack(IODevice* cpu, uint8_t* stackPointer);
 
+        void reset();
         void push(uint8_t byte);
         uint8_t pop();
 

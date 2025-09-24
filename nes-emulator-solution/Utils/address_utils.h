@@ -12,5 +12,6 @@ namespace nes
 
     uint16_t readFullAddressWithIncrementPC(const IODevice& io, uint16_t& programCounter);
     uint16_t readFullAddress(const IODevice& io, uint16_t address);
+    void writeFullAddress(IODevice& io, uint16_t startWriteAddress, uint16_t address);
     bool isAddressOnSamePage(uint16_t a, uint16_t b);
 }

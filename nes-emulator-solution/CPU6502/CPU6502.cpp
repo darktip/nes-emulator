@@ -316,7 +316,7 @@ void CPU6502::submit(uint16_t address, uint8_t value)
     }
 }
 
-void CPU6502::branch(uint8_t relAddr, uint8_t& cycles)
+void CPU6502::branch(uint16_t relAddr, uint8_t& cycles)
 {
     cycles++;
     uint16_t currentPC = pc_reg;
@@ -497,7 +497,7 @@ void CPU6502::BCC(uint16_t address, uint8_t& cycles)
 {
     if (getStatusFlag(Carry) == true)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
@@ -505,15 +505,15 @@ void CPU6502::BCS(uint16_t address, uint8_t& cycles)
 {
     if (getStatusFlag(Carry) == false)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
 void CPU6502::BEQ(uint16_t address, uint8_t& cycles)
 {
-    if (getStatusFlag(Zero) == false)
+    if (getStatusFlag(Zero) == true)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
@@ -530,15 +530,15 @@ void CPU6502::BMI(uint16_t address, uint8_t& cycles)
 {
     if (getStatusFlag(Negative) == false)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
 void CPU6502::BNE(uint16_t address, uint8_t& cycles)
 {
-    if (getStatusFlag(Zero) == true)
+    if (getStatusFlag(Zero) == false)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
@@ -546,7 +546,7 @@ void CPU6502::BPL(uint16_t address, uint8_t& cycles)
 {
     if (getStatusFlag(Negative) == true)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
@@ -568,7 +568,7 @@ void CPU6502::BVC(uint16_t address, uint8_t& cycles)
 {
     if (getStatusFlag(Overflow) == false)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 
@@ -576,7 +576,7 @@ void CPU6502::BVS(uint16_t address, uint8_t& cycles)
 {
     if (getStatusFlag(Overflow) == true)
     {
-        branch(static_cast<uint8_t>(address), cycles);
+        branch(address, cycles);
     }
 }
 

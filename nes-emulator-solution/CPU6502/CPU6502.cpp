@@ -903,3 +903,52 @@ void CPU6502::ILL(uint16_t address, uint8_t& cycles)
 {
     // Do nothing. No illigal opcodes implementation for this NES emulator
 }
+
+// Hardware Interrupts
+void CPU6502::IRQ()
+{
+    if (getStatusFlag(IRQDisable) == true)
+    {
+        return;
+    }
+    
+    uint8_t sr = status_reg & ~BRKCommand | Unused; // bit 5 always set when pushing SR
+    
+    pushAddressToStack(pc_reg);
+    stack.push(sr);
+    
+    setStatusFlag(IRQDisable, true);
+    
+    uint16_t next_pc = readFullAddress(*bus, SYSTEM_VECTOR_IRQ);
+    pc_reg = next_pc;
+
+    opCyclesCount = 7;
+}
+
+void CPU6502::NMI()
+{
+    uint8_t sr = status_reg & ~BRKCommand | Unused; // bit 5 always set when pushing SR
+    
+    pushAddressToStack(pc_reg);
+    stack.push(sr);
+    
+    setStatusFlag(IRQDisable, true);
+    
+    uint16_t next_pc = readFullAddress(*bus, SYSTEM_VECTOR_NMI);
+    pc_reg = next_pc;
+
+    opCyclesCount = 8;
+}
+
+void CPU6502::reset()
+{
+    resetInternal();
+    setStatusFlag(IRQDisable, true);
+    setStatusFlag(DecimalMode, false);
+    setStatusFlag(Unused, true);
+    
+    uint16_t next_pc = readFullAddress(*bus, SYSTEM_VECTOR_RES);
+    pc_reg = next_pc;
+
+    opCyclesCount = 8;
+}
